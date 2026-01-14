@@ -24,7 +24,7 @@ public class AppConfig {
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setUrl("jdbc:mysql://localhost:3306/smilespace");
         dataSource.setUsername("root");
-        dataSource.setPassword("Hoo@790204");
+        dataSource.setPassword("admin123");
         return dataSource;
     }
     

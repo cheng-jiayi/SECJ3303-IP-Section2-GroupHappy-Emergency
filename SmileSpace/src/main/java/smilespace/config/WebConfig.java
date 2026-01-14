@@ -18,30 +18,43 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/modules/");
+        resolver.setPrefix("/WEB-INF/views/modules/");
         resolver.setSuffix(".jsp");
         registry.viewResolver(resolver);
     }
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Use a more specific pattern instead of **/images/**
-        registry.addResourceHandler("/modules/*/images/**")
-                .addResourceLocations("/modules/");
+        // Serve uploaded files
+        String uploadPath = System.getProperty("user.dir") + "/uploads/";
+        System.out.println("DEBUG: Upload path configured: " + uploadPath);
         
-        // Handle CSS, JS, and other resources
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + uploadPath)
+                .setCachePeriod(3600);
+        
+        // CSS resources
         registry.addResourceHandler("/css/**")
-                .addResourceLocations("/css/");
+                .addResourceLocations("/css/")
+                .setCachePeriod(3600);
         
+        // JavaScript resources
         registry.addResourceHandler("/js/**")
-                .addResourceLocations("/js/");
+                .addResourceLocations("/js/")
+                .setCachePeriod(3600);
         
+        // General images
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("/images/");
+                .addResourceLocations("/images/")
+                .setCachePeriod(3600);
         
-        // If you need to serve all static resources from root
-        // But be careful with this - it might conflict with your view resolver
+        // Static resources
         registry.addResourceHandler("/static/**")
-                .addResourceLocations("/static/");
+                .addResourceLocations("/static/")
+                .setCachePeriod(3600);
+        
+        // WebJars for Bootstrap, jQuery, etc.
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }
