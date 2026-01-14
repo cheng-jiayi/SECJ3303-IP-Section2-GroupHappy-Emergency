@@ -32,7 +32,7 @@ public class MoodAuthorizationFilter implements Filter {
             session.setAttribute("originalURL", originalURL);
             
             // Redirect to login page
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/userManagementModule/loginPage.jsp");
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
             return;
         }
         

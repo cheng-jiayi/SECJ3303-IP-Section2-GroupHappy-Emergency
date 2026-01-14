@@ -71,7 +71,7 @@ public class MoodController {
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Error: " + e.getMessage());
-            return "/error.jsp";
+            return "error";
         }
     }
     
@@ -121,7 +121,7 @@ public class MoodController {
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Error: " + e.getMessage());
-            return "/error.jsp";
+            return "error";
         }
     }
     
@@ -142,7 +142,7 @@ public class MoodController {
             model.addAttribute("successMessage", "Mood entry added successfully!");
         }
         
-        return "/moodAndWellnessModule/recordMood.jsp";
+        return "moodAndWellnessModule/recordMood";
     }
     
     private String addNewMoodEntry(int userId, String[] feelingArray, String reflection, 
@@ -167,7 +167,7 @@ public class MoodController {
             if (feelingList.isEmpty()) {
                 model.addAttribute("error", "Please select at least one feeling");
                 model.addAttribute("selectedFeelings", feelingArray);
-                return "/modules/moodAndWellnessModule/addMoodFeelings.jsp";
+                return "moodAndWellnessModule/addMoodFeelings";
             }
 
             Set<String> tagSet = new HashSet<>();
@@ -219,7 +219,7 @@ public class MoodController {
                 } else {
                     // Store in session for thank you page
                     model.addAttribute("savedEntry", newEntry);
-                    return "/moodAndWellnessModule/moodThankYou.jsp";
+                    return "moodAndWellnessModule/moodThankYou";
                 }
             } else {
                 System.out.println("DEBUG: Save failed! Checking why...");
@@ -234,7 +234,7 @@ public class MoodController {
                     // Go back to details page with feelings preserved
                     model.addAttribute("selectedFeelings", feelingArray);
                     model.addAttribute("error", "Failed to save mood entry. Please try again.");
-                    return "/moodAndWellnessModule/addMoodDetails.jsp";
+                    return "moodAndWellnessModule/addMoodDetails";
                 }
             }
             
@@ -243,7 +243,7 @@ public class MoodController {
             e.printStackTrace();
             model.addAttribute("error", "An error occurred: " + e.getMessage());
             model.addAttribute("selectedFeelings", feelingArray);
-            return "/moodAndWellnessModule/addMoodDetails.jsp";
+            return "moodAndWellnessModule/addMoodDetails";
         }
     }
     
@@ -254,17 +254,17 @@ public class MoodController {
             return "redirect:/mood?action=viewDaily&date=" + LocalDate.now();
         }
         
-        return "/moodAndWellnessModule/addMoodFeelings.jsp";
+        return "moodAndWellnessModule/addMoodFeelings";
     }
     
     private String showAddMoodDetails(int userId, String[] selectedFeelings, Model model) {
         if (selectedFeelings == null || selectedFeelings.length == 0) {
             model.addAttribute("error", "Please select at least one feeling");
-            return "/moodAndWellnessModule/addMoodFeelings.jsp";
+            return "moodAndWellnessModule/addMoodFeelings";
         }
         
         model.addAttribute("selectedFeelings", selectedFeelings);
-        return "/moodAndWellnessModule/addMoodDetails.jsp";
+        return "moodAndWellnessModule/addMoodDetails";
     }
     
     private String showMoodTrends(int userId, String period, Model model) {
@@ -276,7 +276,7 @@ public class MoodController {
         model.addAttribute("allMoodEntries", allEntries);
         model.addAttribute("moodTrends", moodService.getMoodTrends(userId));
     
-        return "/moodAndWellnessModule/viewMoodTrends.jsp";
+        return "moodAndWellnessModule/viewMoodTrends";
     }
     
     private String showDailyMood(int userId, LocalDate date, Model model) {
@@ -289,7 +289,7 @@ public class MoodController {
                 if (dailyMood != null) {
                     System.out.println("DEBUG: Found mood entry for date: " + date);
                     model.addAttribute("dailyMood", dailyMood);
-                    return "/moodAndWellnessModule/viewDailyMood.jsp";
+                    return "moodAndWellnessModule/viewDailyMood";
                 } else {
                     System.out.println("DEBUG: No mood entry found for date: " + date);
                     model.addAttribute("message", "No mood entry found for " + date);
@@ -319,7 +319,7 @@ public class MoodController {
                 model.addAttribute("selectedFeelings", moodToEdit.getFeelings().toArray(new String[0]));
                 model.addAttribute("moodToEdit", moodToEdit);
                 model.addAttribute("isEdit", true);
-                return "/moodAndWellnessModule/addMoodFeelings.jsp";
+                return "moodAndWellnessModule/addMoodFeelings";
             } else {
                 return "redirect:/mood?action=viewTrends";
             }
@@ -340,7 +340,7 @@ public class MoodController {
                 model.addAttribute("selectedFeelings", feelings);
                 model.addAttribute("moodToEdit", moodToEdit);
                 model.addAttribute("isEdit", true);
-                return "/moodAndWellnessModule/addMoodDetails.jsp";
+                return "moodAndWellnessModule/addMoodDetails";
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -376,7 +376,7 @@ public class MoodController {
                 model.addAttribute("error", "Please select at least one feeling");
                 model.addAttribute("moodToEdit", updatedEntry);
                 model.addAttribute("isEdit", true);
-                return "/moodAndWellnessModule/addMoodFeelings.jsp";
+                return "moodAndWellnessModule/addMoodFeelings";
             }
     
             Set<String> tagSet = new HashSet<>();
@@ -417,7 +417,7 @@ public class MoodController {
                     return "redirect:/mood?action=viewDaily&date=" + updatedEntry.getEntryDate();
                 } else {
                     model.addAttribute("savedEntry", updatedEntry);
-                    return "/moodAndWellnessModule/moodThankYou.jsp";
+                    return "moodAndWellnessModule/moodThankYou";
                 }
             } else {
                 return "redirect:/mood?action=viewTrends";
@@ -464,6 +464,6 @@ public class MoodController {
         }
         
         model.addAttribute("savedEntry", savedEntry);
-        return "/moodAndWellnessModule/moodThankYou.jsp";
+        return "moodAndWellnessModule/moodThankYou";
     }
 }
