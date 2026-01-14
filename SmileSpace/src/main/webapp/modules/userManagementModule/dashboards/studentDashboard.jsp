@@ -285,7 +285,7 @@
                 <a href="../profiles/studentProfile.jsp" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
-                <a href="../logout" class="menu-item logout">
+                <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
