@@ -59,4 +59,5 @@ CREATE INDEX idx_feedback_created ON feedback(created_at);
 ALTER TABLE feedback ADD COLUMN rating INT NULL AFTER sentiment;
 
 INSERT INTO users (username, email, password_hash, full_name, user_role, matric_number, program, year, phone) VALUES
-('admin1', 'admin1@email.com', '$2a$10$KSODLdL2mfTGJnIYJJf1zegCDkWW9Guvkzy6r0W/0grjSQuetomUG', 'Dr. Nurain Shafikah', 'admin', NULL, NULL, NULL, '011-3333333'),
+('admin1', 'admin1@email.com', '$2a$10$KSODLdL2mfTGJnIYJJf1zegCDkWW9Guvkzy6r0W/0grjSQuetomUG', 'Dr. Nurain Shafikah', 'admin', NULL, NULL, NULL, '011-3333333');
+
