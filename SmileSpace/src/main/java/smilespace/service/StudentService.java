@@ -63,4 +63,25 @@ public class StudentService {
             return null;
         }
     }
+    
+    // Add this method for the referral form
+    public Student getAtRiskStudentById(int studentId) {
+        Student student = getStudentByUserId(studentId);
+        if (student != null && 
+            ("HIGH".equals(student.getRiskLevel()) || "MEDIUM".equals(student.getRiskLevel()))) {
+            return student;
+        }
+        return null;
+    }
+
+    public List<Student> getAtRiskStudentsWithReferralStatus(int facultyId) {
+        try {
+            List<Student> students = studentDAO.getAtRiskStudentsWithReferralStatus(facultyId);
+            logger.info("Retrieved " + students.size() + " at-risk students with referral status");
+            return students;
+        } catch (Exception e) {
+            logger.severe("Error retrieving at-risk students with referral status: " + e.getMessage());
+            return List.of();
+        }
+    }
 }

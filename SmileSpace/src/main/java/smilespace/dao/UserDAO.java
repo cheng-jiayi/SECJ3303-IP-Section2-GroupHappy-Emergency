@@ -74,7 +74,7 @@ public class UserDAO {
     
     public boolean createUser(User user) {
         String sql = "INSERT INTO users (username, email, password_hash, full_name, user_role, " +
-                     "phone, matric_number, program, year, is_active) " +
+                     "phone, matric_number, faculty, year, is_active) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try {
@@ -100,7 +100,7 @@ public class UserDAO {
     
     public boolean updateUser(User user) {
         String sql = "UPDATE users SET email = ?, full_name = ?, phone = ?, " +
-                     "matric_number = ?, program = ?, year = ? WHERE user_id = ?";
+                     "matric_number = ?, faculty = ?, year = ? WHERE user_id = ?";
         
         try {
             int affectedRows = jdbcTemplate.update(sql,
@@ -216,7 +216,7 @@ public class UserDAO {
             user.setUserRole(rs.getString("user_role"));
             user.setPhone(rs.getString("phone"));
             user.setMatricNumber(rs.getString("matric_number"));
-            user.setProgram(rs.getString("program"));
+            user.setProgram(rs.getString("faculty"));
             
             Integer year = rs.getInt("year");
             if (rs.wasNull()) {
@@ -232,6 +232,66 @@ public class UserDAO {
             Timestamp lastLogin = rs.getTimestamp("last_login");
             if (lastLogin != null) {
                 user.setLastLogin(lastLogin.toLocalDateTime());
+            }
+            
+            user.setActive(rs.getBoolean("is_active"));
+            
+            return user;
+        }
+    }
+
+    public List<User> getAtRiskStudents() {
+        String sql = "SELECT * FROM users WHERE user_role = 'student' " +
+                    "AND risk_level IN ('HIGH', 'MEDIUM') " +
+                    "ORDER BY " +
+                    "CASE risk_level " +
+                    "    WHEN 'HIGH' THEN 1 " +
+                    "    WHEN 'MEDIUM' THEN 2 " +
+                    "    ELSE 3 " +
+                    "END, " +
+                    "mood_stability ASC";
+        return jdbcTemplate.query(sql, new AtRiskUserRowMapper());
+    }
+
+    public User getAtRiskStudentById(int studentId) {
+        String sql = "SELECT * FROM users WHERE user_id = ? AND user_role = 'student'";
+        try {
+            return jdbcTemplate.queryForObject(sql, new AtRiskUserRowMapper(), studentId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // New RowMapper for at-risk students (includes risk fields)
+    private static class AtRiskUserRowMapper implements RowMapper<User> {
+        @Override
+        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+            User user = new User();
+            user.setUserId(rs.getInt("user_id"));
+            user.setUsername(rs.getString("username"));
+            user.setEmail(rs.getString("email"));
+            user.setFullName(rs.getString("full_name"));
+            user.setUserRole(rs.getString("user_role"));
+            user.setPhone(rs.getString("phone"));
+            user.setMatricNumber(rs.getString("matric_number"));
+            user.setProgram(rs.getString("faculty"));
+            
+            Integer year = rs.getInt("year");
+            if (rs.wasNull()) {
+                year = null;
+            }
+            user.setYear(year);
+            
+            // Risk assessment fields
+            user.setRiskLevel(rs.getString("risk_level"));
+            user.setRecentMood(rs.getString("recent_mood"));
+            user.setMoodStability(rs.getDouble("mood_stability"));
+            user.setFrequentTags(rs.getString("frequent_tags"));
+            user.setAssessmentCategory(rs.getString("assessment_category"));
+            
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            if (createdAt != null) {
+                user.setCreatedAt(createdAt.toLocalDateTime());
             }
             
             user.setActive(rs.getBoolean("is_active"));

@@ -13,8 +13,6 @@ public class UserService {
     @Autowired
     private UserDAO userDAO;
     
-    // No need for constructor - Spring injects DAO
-    
     public User authenticateUser(String username, String password) {
         System.out.println("DEBUG: Authenticating user: " + username);
         
@@ -109,5 +107,13 @@ public class UserService {
     
     public boolean deleteUser(int userId) {
         return userDAO.deleteUser(userId);
+    }
+
+    public List<User> getAtRiskStudents() {
+        return userDAO.getAtRiskStudents();
+    }
+
+    public User getAtRiskStudentById(int studentId) {
+        return userDAO.getAtRiskStudentById(studentId);
     }
 }

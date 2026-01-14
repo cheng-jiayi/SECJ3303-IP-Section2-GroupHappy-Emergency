@@ -1,6 +1,7 @@
 package smilespace.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,15 @@ public class ProfessionalDAO {
             return jdbcTemplate.queryForObject(sql, new ProfessionalRowMapper(), professionalId);
         } catch (Exception e) {
             logger.severe("Error getting professional by ID: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public Professional getProfessionalByEmail(String email) {
+        String sql = "SELECT * FROM professionals WHERE email = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, new ProfessionalRowMapper(), email);
+        } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }

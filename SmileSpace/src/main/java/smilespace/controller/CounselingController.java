@@ -7,10 +7,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import smilespace.model.CounselingSession;
+import smilespace.model.Professional;
+import smilespace.model.Referral;
 import smilespace.model.Student;
 import smilespace.model.User;
 import smilespace.service.CounselingService;
+import smilespace.service.ProfessionalService;
+import smilespace.service.ReferralService;
 import smilespace.service.StudentService;
+import smilespace.dao.UserDAO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -30,6 +35,15 @@ public class CounselingController {
     
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private ProfessionalService professionalService;
+
+    @Autowired
+    private ReferralService referralService;
+    
+    @Autowired
+    private UserDAO userDAO;
     
     @GetMapping
     public String handleGet(@RequestParam(value = "action", required = false) String action,
@@ -55,7 +69,7 @@ public class CounselingController {
                 if ("student".equals(userRole)) {
                     return showStudentSessions(userId, model);
                 } else if ("professional".equals(userRole)) {
-                    return showCounselorSessions(userId, model);
+                    return showCounselorSessions(userId, model, session);
                 } else {
                     return "redirect:/index.jsp";
                 }
@@ -72,7 +86,7 @@ public class CounselingController {
                 if ("student".equals(userRole)) {
                     return showStudentSessions(userId, model);
                 } else if ("professional".equals(userRole)) {
-                    return showCounselorSessions(userId, model);
+                    return showCounselorSessions(userId, model, session);
                 } else {
                     return "redirect:/index.jsp";
                 }
@@ -81,7 +95,7 @@ public class CounselingController {
             System.err.println("ERROR in CounselingController: " + e.getMessage());
             e.printStackTrace();
             model.addAttribute("error", "Error: " + e.getMessage());
-            return "/error.jsp";
+            return "error";
         }
     }
     
@@ -124,13 +138,17 @@ public class CounselingController {
                                           attachmentFile, model, request);
             } else if ("deleteSession".equals(action) && sessionId != null) {
                 return deleteSession(userId, userRole, sessionId);
+            } else if ("acceptSessions".equals(action) && "professional".equals(userRole)) {
+                return acceptSessions(userId, request, model);
+            } else if ("acceptSingleSession".equals(action) && "professional".equals(userRole) && sessionId != null) {
+                return acceptSingleSession(userId, sessionId, model);
             } else {
                 return "redirect:/counseling?action=viewSessions";
             }
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Error: " + e.getMessage());
-            return "/error.jsp";
+            return "error";
         }
     }
     
@@ -209,37 +227,104 @@ public class CounselingController {
         model.addAttribute("sessions", sessions);
         return "virtualCounselingModule/student/studentSessions";
     }
-    
-    private String showCounselorSessions(int userId, Model model) {
-        List<CounselingSession> sessions = counselingService.getCounselorSessions(userId);
-        model.addAttribute("sessions", sessions);
+
+    private String showCounselorSessions(int userId, Model model, HttpSession httpSession) {
+        System.out.println("=== DEBUG showCounselorSessions ===");
+        System.out.println("User ID: " + userId);
+        
+        // Get assigned counseling sessions
+        List<CounselingSession> mySessions = counselingService.getCounselorSessions(userId);
+        System.out.println("My assigned sessions count: " + mySessions.size());
+        
+        // Get unassigned counseling sessions
+        List<CounselingSession> unassignedSessions = counselingService.getSessionsPendingAssignment();
+        System.out.println("Unassigned sessions count: " + unassignedSessions.size());
+        
+        // Get pending referrals (THIS IS CRITICAL - add this line)
+        List<Referral> pendingReferrals = referralService.getPendingReferrals();
+        System.out.println("Pending referrals count: " + pendingReferrals.size());
+        
+        // Get professional info
+        Professional professional = null;
+        User user = (User) httpSession.getAttribute("user");
+        if (user != null && "professional".equals(user.getUserRole())) {
+            try {
+                professional = professionalService.getProfessionalById(userId);
+                
+                if (professional == null) {
+                    System.out.println("No professional found with ID: " + userId);
+                    // Create basic professional object from user
+                    professional = new Professional();
+                    professional.setFullName(user.getFullName());
+                    professional.setEmail(user.getEmail());
+                    professional.setSpecialization("Mental Health");
+                    professional.setExperienceYears(0);
+                    System.out.println("Created dummy professional from user info");
+                } else {
+                    System.out.println("Got Professional info for: " + professional.getFullName());
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting professional info: " + e.getMessage());
+                e.printStackTrace();
+                // Create basic professional object from user
+                professional = new Professional();
+                professional.setFullName(user.getFullName());
+                professional.setEmail(user.getEmail());
+                professional.setSpecialization("Mental Health");
+            }
+        }
+        
+        // ADD THESE TO THE MODEL:
+        model.addAttribute("mySessions", mySessions);
+        model.addAttribute("unassignedSessions", unassignedSessions);
+        model.addAttribute("pendingReferrals", pendingReferrals); // ← ADD THIS LINE
+        model.addAttribute("professional", professional);
+        
         return "virtualCounselingModule/professional/mhpSessions";
     }
-    
+
     private String showSessionDetails(int userId, String userRole, int sessionId, Model model) {
+        System.out.println("\n\n===== DEBUG: showSessionDetails START =====");
+        System.out.println("DEBUG: User ID: " + userId);
+        System.out.println("DEBUG: User Role: " + userRole);
+        System.out.println("DEBUG: Session ID: " + sessionId);
+        
         CounselingSession session = counselingService.getSessionById(sessionId);
+        
         if (session == null) {
+            System.out.println("ERROR: Session is NULL");
             return "redirect:/counseling?action=viewSessions";
         }
         
+        System.out.println("DEBUG: Session found - ID: " + session.getSessionId());
+        
         // Check permissions
-        if (!(session.getStudentId() == userId || session.getCounselorId() == userId)) {
+        if (!(session.getStudentId() == userId || 
+            (session.getCounselorId() != null && session.getCounselorId() == userId))) {
+            System.out.println("ERROR: Permission denied");
             return "redirect:/counseling?action=viewSessions";
         }
         
         model.addAttribute("session", session);
         
         if ("professional".equals(userRole)) {
+            System.out.println("DEBUG: Getting student info for professional");
             Student student = studentService.getStudentByUserId(session.getStudentId());
             if (student != null) {
                 model.addAttribute("student", student);
             }
-            return "virtualCounselingModule/professional/sessionDetails";
+            
+            // IMPORTANT: Check what view name is being returned
+            String viewName = "virtualCounselingModule/professional/sessionDetails";
+            System.out.println("DEBUG: Returning view: " + viewName);
+            return viewName;
         } else {
-            return "virtualCounselingModule/student/sessionDetails";
+            String viewName = "virtualCounselingModule/student/sessionDetails";
+            System.out.println("DEBUG: Returning view: " + viewName);
+            return viewName;
         }
     }
-    
+
     private String showDocumentSessionForm(int userId, int sessionId, Model model) {
         CounselingSession session = counselingService.getSessionById(sessionId);
         if (session == null || session.getCounselorId() != userId || !session.isScheduled()) {
@@ -331,6 +416,34 @@ public class CounselingController {
             }
         }
         
+        return "redirect:/counseling?action=viewSessions";
+    }
+    
+    private String acceptSessions(int userId, HttpServletRequest request, Model model) {
+        String[] sessionIds = request.getParameterValues("sessionIds");
+        if (sessionIds != null && sessionIds.length > 0) {
+            System.out.println("Accepting multiple sessions: " + sessionIds.length);
+            for (String sessionIdStr : sessionIds) {
+                try {
+                    int sessionId = Integer.parseInt(sessionIdStr);
+                    counselingService.assignCounselor(sessionId, userId);
+                    System.out.println("Assigned session " + sessionId + " to counselor " + userId);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid session ID: " + sessionIdStr);
+                }
+            }
+        }
+        return "redirect:/counseling?action=viewSessions";
+    }
+    
+    private String acceptSingleSession(int userId, int sessionId, Model model) {
+        System.out.println("Accepting single session: " + sessionId);
+        boolean success = counselingService.assignCounselor(sessionId, userId);
+        if (success) {
+            System.out.println("Successfully assigned session " + sessionId);
+        } else {
+            System.out.println("Failed to assign session " + sessionId);
+        }
         return "redirect:/counseling?action=viewSessions";
     }
 }

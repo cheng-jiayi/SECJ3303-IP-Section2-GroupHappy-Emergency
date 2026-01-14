@@ -84,7 +84,7 @@ public class MoodController {
                             @RequestParam(value = "tags", required = false) String[] tags,
                             @RequestParam(value = "referrer", required = false) String referrer,
                             @RequestParam(value = "imagePath", required = false) MultipartFile imageFile,
-                            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, // This already exists
                             HttpSession session,
                             HttpServletRequest request,
                             Model model) throws IOException {
@@ -106,9 +106,9 @@ public class MoodController {
         
         try {
             if ("addMoodDetails".equals(action)) {
-                return showAddMoodDetails(userId, feelingArray, model);
+                return showAddMoodDetails(userId, feelingArray, date, model);
             } else if ("addMood".equals(action)) {
-                return addNewMoodEntry(userId, feelingArray, reflection, tags, referrer, imageFile, request, model);
+                return addNewMoodEntry(userId, feelingArray, reflection, tags, referrer, imageFile, date, request, model);
             } else if ("updateMood".equals(action)) {
                 return updateMoodEntry(userId, id, feelingArray, reflection, tags, referrer, imageFile, request, model);
             } else if ("deleteMood".equals(action)) {
@@ -124,7 +124,6 @@ public class MoodController {
             return "error";
         }
     }
-    
     // ===== PRIVATE METHODS =====
     
     private String showMainPage(int userId, String success, Model model) {
@@ -146,11 +145,13 @@ public class MoodController {
     }
     
     private String addNewMoodEntry(int userId, String[] feelingArray, String reflection, 
-                                  String[] tags, String referrer, MultipartFile imageFile,
-                                  HttpServletRequest request, Model model) throws IOException {
-        
+                              String[] tags, String referrer, MultipartFile imageFile,
+                              LocalDate selectedDate, // Changed parameter name
+                              HttpServletRequest request, Model model) throws IOException {
+    
         System.out.println("DEBUG: ======== addNewMoodEntry START ========");
         System.out.println("DEBUG: User ID: " + userId);
+        System.out.println("DEBUG: Selected date: " + selectedDate);
         System.out.println("DEBUG: Current date: " + LocalDate.now());
         System.out.println("DEBUG: Feeling count: " + (feelingArray != null ? feelingArray.length : 0));
         
@@ -184,19 +185,47 @@ public class MoodController {
             if (imageFile != null && !imageFile.isEmpty()) {
                 String fileName = imageFile.getOriginalFilename();
                 if (fileName != null && !fileName.isEmpty()) {
-                    // Create uploads directory
-                    String uploadDir = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "moods";
+                    // Sanitize filename - replace spaces with underscores
+                    String sanitizedFileName = fileName.replaceAll("\\s+", "_");
+                    
+                    // Use your specific project path
+                    String projectPath = System.getProperty("user.dir");
+                    String uploadDir = projectPath + File.separator + "uploads" + File.separator + "moods";
+                    
                     File uploadDirFile = new File(uploadDir);
                     if (!uploadDirFile.exists()) {
-                        uploadDirFile.mkdirs();
+                        boolean created = uploadDirFile.mkdirs();
+                        System.out.println("DEBUG: Created upload directory: " + created);
+                        System.out.println("DEBUG: Directory path: " + uploadDirFile.getAbsolutePath());
                     }
                     
-                    String uniqueFileName = userId + "_" + System.currentTimeMillis() + "_" + fileName;
+                    String uniqueFileName = userId + "_" + System.currentTimeMillis() + "_" + sanitizedFileName;
                     String filePath = uploadDir + File.separator + uniqueFileName;
-                    imageFile.transferTo(new File(filePath));
                     
-                    // Store relative path for database
+                    // Debug output
+                    System.out.println("=== DEBUG: Image Upload ===");
+                    System.out.println("Project Path: " + projectPath);
+                    System.out.println("Upload Directory: " + uploadDir);
+                    System.out.println("Unique Filename: " + uniqueFileName);
+                    System.out.println("Full File Path: " + filePath);
+                    
+                    // Save the file
+                    try {
+                        imageFile.transferTo(new File(filePath));
+                        System.out.println("DEBUG: File saved successfully!");
+                        
+                        // Verify
+                        File savedFile = new File(filePath);
+                        System.out.println("DEBUG: File exists: " + savedFile.exists());
+                        System.out.println("DEBUG: File size: " + savedFile.length() + " bytes");
+                    } catch (IOException e) {
+                        System.err.println("ERROR saving file: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    
+                    // Store relative path for database - WITHOUT leading slash
                     uploadedImagePath = "uploads/moods/" + uniqueFileName;
+                    System.out.println("DEBUG: Path to store in DB: " + uploadedImagePath);
                 }
             }
 
@@ -206,7 +235,15 @@ public class MoodController {
             newEntry.setReflection(reflection != null ? reflection.trim() : "");
             newEntry.setTags(tagSet);
             newEntry.setImagePath(uploadedImagePath);
-            newEntry.setEntryDate(LocalDate.now());
+            
+            // FIX: Use selectedDate if provided, otherwise use today
+            if (selectedDate != null) {
+                newEntry.setEntryDate(selectedDate);
+            } else {
+                newEntry.setEntryDate(LocalDate.now());
+            }
+            
+            System.out.println("DEBUG: Final entry date: " + newEntry.getEntryDate());
 
             System.out.println("DEBUG: Attempting to save mood entry...");
             boolean success = moodService.createMoodEntry(newEntry);
@@ -224,11 +261,11 @@ public class MoodController {
             } else {
                 System.out.println("DEBUG: Save failed! Checking why...");
                 
-                // Check if entry already exists for today
-                MoodEntry existingEntry = moodService.getMoodEntryByDate(userId, LocalDate.now());
+                // Check if entry already exists for the selected date
+                MoodEntry existingEntry = moodService.getMoodEntryByDate(userId, selectedDate != null ? selectedDate : LocalDate.now());
                 if (existingEntry != null) {
-                    System.out.println("DEBUG: Entry already exists for today. Redirecting to daily view page.");
-                    return "redirect:/mood?action=viewDaily&date=" + LocalDate.now();
+                    System.out.println("DEBUG: Entry already exists for selected date. Redirecting to daily view page.");
+                    return "redirect:/mood?action=viewDaily&date=" + (selectedDate != null ? selectedDate : LocalDate.now());
                 } else {
                     System.out.println("DEBUG: No existing entry found, but save still failed.");
                     // Go back to details page with feelings preserved
@@ -246,24 +283,38 @@ public class MoodController {
             return "moodAndWellnessModule/addMoodDetails";
         }
     }
-    
+
     private String showAddMoodFeelings(int userId, LocalDate date, HttpSession session, Model model) {
-        MoodEntry existingEntry = moodService.getMoodEntryByDate(userId, LocalDate.now());
+        System.out.println("DEBUG: showAddMoodFeelings called");
+        System.out.println("DEBUG: Date parameter: " + date);
+        System.out.println("DEBUG: Today's date: " + LocalDate.now());
+        
+        LocalDate checkDate = (date != null) ? date : LocalDate.now();
+        MoodEntry existingEntry = moodService.getMoodEntryByDate(userId, checkDate);
+        
         if (existingEntry != null) {
-            System.out.println("DEBUG: Entry already exists for today. Redirecting to daily view.");
-            return "redirect:/mood?action=viewDaily&date=" + LocalDate.now();
+            System.out.println("DEBUG: Entry already exists for date: " + checkDate);
+            System.out.println("DEBUG: Redirecting to daily view for date: " + checkDate);
+            return "redirect:/mood?action=viewDaily&date=" + checkDate;
         }
         
+        System.out.println("DEBUG: No entry exists for date: " + checkDate + ". Showing add feelings page.");
         return "moodAndWellnessModule/addMoodFeelings";
     }
-    
-    private String showAddMoodDetails(int userId, String[] selectedFeelings, Model model) {
+
+    private String showAddMoodDetails(int userId, String[] selectedFeelings, 
+                                 LocalDate date,
+                                 Model model) {
         if (selectedFeelings == null || selectedFeelings.length == 0) {
             model.addAttribute("error", "Please select at least one feeling");
             return "moodAndWellnessModule/addMoodFeelings";
         }
         
         model.addAttribute("selectedFeelings", selectedFeelings);
+
+        if (date != null) {
+            model.addAttribute("date", date.toString());
+        }
         return "moodAndWellnessModule/addMoodDetails";
     }
     
@@ -319,6 +370,9 @@ public class MoodController {
                 model.addAttribute("selectedFeelings", moodToEdit.getFeelings().toArray(new String[0]));
                 model.addAttribute("moodToEdit", moodToEdit);
                 model.addAttribute("isEdit", true);
+                model.addAttribute("date", moodToEdit.getEntryDate().toString());
+                System.out.println("DEBUG showEditMood: Adding date to model: " + moodToEdit.getEntryDate());
+                
                 return "moodAndWellnessModule/addMoodFeelings";
             } else {
                 return "redirect:/mood?action=viewTrends";
@@ -349,20 +403,20 @@ public class MoodController {
     }
     
     private String updateMoodEntry(int userId, Integer id, String[] feelingArray, 
-                                  String reflection, String[] tags, String referrer,
-                                  MultipartFile imageFile, HttpServletRequest request,
-                                  Model model) throws IOException {
-        
+                              String reflection, String[] tags, String referrer,
+                              MultipartFile imageFile, HttpServletRequest request,
+                              Model model) throws IOException {
+    
         if (id == null) {
             return "redirect:/mood?action=viewTrends";
         }
-    
+
         try {
             MoodEntry updatedEntry = moodService.getMoodEntryById(id, userId);
             if (updatedEntry == null) {
                 return "redirect:/mood?action=viewTrends";
             }
-    
+
             List<String> feelingList = new ArrayList<>();
             if (feelingArray != null) {
                 for (String feeling : feelingArray) {
@@ -371,14 +425,14 @@ public class MoodController {
                     }
                 }
             }
-    
+
             if (feelingList.isEmpty()) {
                 model.addAttribute("error", "Please select at least one feeling");
                 model.addAttribute("moodToEdit", updatedEntry);
                 model.addAttribute("isEdit", true);
                 return "moodAndWellnessModule/addMoodFeelings";
             }
-    
+
             Set<String> tagSet = new HashSet<>();
             if (tags != null) {
                 for (String tag : tags) {
@@ -387,38 +441,59 @@ public class MoodController {
                     }
                 }
             }
-    
-            // Handle file upload
+
+            // Handle file upload - USE THE SAME PATH AS addNewMoodEntry
             if (imageFile != null && !imageFile.isEmpty()) {
                 String fileName = imageFile.getOriginalFilename();
                 if (fileName != null && !fileName.isEmpty()) {
-                    String uploadDir = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "moods";
+                    // Sanitize filename - replace spaces with underscores
+                    String sanitizedFileName = fileName.replaceAll("\\s+", "_");
+                    
+                    // USE THE SAME PATH AS addNewMoodEntry
+                    String projectPath = System.getProperty("user.dir");
+                    String uploadDir = projectPath + File.separator + "uploads" + File.separator + "moods";
+                    
                     File uploadDirFile = new File(uploadDir);
                     if (!uploadDirFile.exists()) {
-                        uploadDirFile.mkdirs();
+                        boolean created = uploadDirFile.mkdirs();
+                        System.out.println("DEBUG: Created upload directory: " + created);
                     }
                     
-                    String uniqueFileName = userId + "_" + System.currentTimeMillis() + "_" + fileName;
+                    String uniqueFileName = userId + "_" + System.currentTimeMillis() + "_" + sanitizedFileName;
                     String filePath = uploadDir + File.separator + uniqueFileName;
+                    
+                    System.out.println("=== DEBUG: Uploading image in edit ===");
+                    System.out.println("Project Path: " + projectPath);
+                    System.out.println("Upload Directory: " + uploadDir);
+                    System.out.println("File path: " + filePath);
+                    
                     imageFile.transferTo(new File(filePath));
                     
+                    // Store path WITHOUT leading slash
                     updatedEntry.setImagePath("uploads/moods/" + uniqueFileName);
+                    
+                    System.out.println("Image path saved to DB: " + updatedEntry.getImagePath());
                 }
             }
-    
+
             updatedEntry.setFeelings(feelingList);
             updatedEntry.setReflection(reflection != null ? reflection.trim() : "");
             updatedEntry.setTags(tagSet);
-    
+
             boolean success = moodService.updateMoodEntry(updatedEntry);
             
+            System.out.println("=== DEBUG: Update result ===");
+            System.out.println("Success: " + success);
+            System.out.println("Entry date: " + updatedEntry.getEntryDate());
+            
             if (success) {
-                if ("trends".equals(referrer)) {
-                    return "redirect:/mood?action=viewDaily&date=" + updatedEntry.getEntryDate();
-                } else {
-                    model.addAttribute("savedEntry", updatedEntry);
-                    return "moodAndWellnessModule/moodThankYou";
-                }
+                // FIX: ALWAYS redirect to daily view after editing (not thank you page)
+                // Add timestamp to prevent browser caching
+                String timestamp = "&t=" + System.currentTimeMillis();
+                String redirectUrl = "redirect:/mood?action=viewDaily&date=" + updatedEntry.getEntryDate() + timestamp;
+                
+                System.out.println("Redirecting to: " + redirectUrl);
+                return redirectUrl;
             } else {
                 return "redirect:/mood?action=viewTrends";
             }
@@ -429,7 +504,7 @@ public class MoodController {
             return showEditMood(userId, id, model);
         }
     }
-    
+
     private String deleteMoodEntry(int userId, Integer id) {
         System.out.println("DEBUG: deleteMoodEntry called");
         System.out.println("DEBUG: id parameter = " + id);

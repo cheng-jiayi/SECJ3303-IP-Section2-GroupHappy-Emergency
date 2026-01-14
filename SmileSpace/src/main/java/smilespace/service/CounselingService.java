@@ -115,6 +115,10 @@ public class CounselingService {
         return false;
     }
 
+    public List<CounselingSession> getSessionsPendingAssignment() {
+        return counselingDAO.getSessionsPendingAssignment();
+    }
+
     public User getCounselorById(int counselorId) {
         return userDAO.getUserById(counselorId);
     }
@@ -156,8 +160,6 @@ public class CounselingService {
     public boolean submitFeedback(int sessionId, String feedback, int rating) {
         CounselingSession session = counselingDAO.getSessionById(sessionId);
         if (session != null && "Completed".equals(session.getStatus())) {
-            session.setStudentFeedback(feedback);
-            session.setRating(rating);
             session.setUpdatedAt(LocalDateTime.now());
             return counselingDAO.updateSession(session);
         }
@@ -202,13 +204,6 @@ public class CounselingService {
             return counselingDAO.updateSession(session);
         }
         return false;
-    }
-    
-    public List<CounselingSession> getSessionsPendingAssignment() {
-        List<CounselingSession> allSessions = counselingDAO.getAllSessions();
-        return allSessions.stream()
-                .filter(session -> "Pending Assignment".equals(session.getStatus()))
-                .collect(Collectors.toList());
     }
     
     public List<CounselingSession> getAllSessions() {

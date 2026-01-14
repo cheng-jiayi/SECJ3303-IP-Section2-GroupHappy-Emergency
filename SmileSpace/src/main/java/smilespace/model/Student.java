@@ -9,7 +9,7 @@ public class Student {
     private String email;
     private String phone;
     private String matricNumber;
-    private String program;
+    private String faculty;
     private int year;
     private boolean isActive;
     private LocalDate lastLogin;
@@ -19,15 +19,18 @@ public class Student {
     private int moodEntryCount;
     private String frequentTags;
     private double moodStability;
+    private String referralStatus;
+    private Integer referralId;
+    private String referralReason;
 
     // Constructors
     public Student() {}
 
-    public Student(int userId, String fullName, String matricNumber, String program, int year) {
+    public Student(int userId, String fullName, String matricNumber, String faculty, int year) {
         this.userId = userId;
         this.fullName = fullName;
         this.matricNumber = matricNumber;
-        this.program = program;
+        this.faculty = faculty;
         this.year = year;
     }
 
@@ -53,11 +56,11 @@ public class Student {
     public String getMatricNumber() { return matricNumber; }
     public void setMatricNumber(String matricNumber) { this.matricNumber = matricNumber; }
 
-    public String getProgram() { return program; }
-    public void setProgram(String program) { this.program = program; }
+    public String getFaculty() { return faculty; }
+    public void setFaculty(String faculty) { this.faculty = faculty; }
 
     public String getProgramYear() { 
-        return program + " / Year " + year;
+        return faculty + " / Year " + year;
     }
 
     public int getYear() { return year; }
@@ -97,5 +100,31 @@ public class Student {
 
     public String getStudentId() { // For JSP compatibility
         return "STU" + String.format("%03d", userId);
+    }
+
+    public String getReferralStatus() { return referralStatus; }
+    public void setReferralStatus(String referralStatus) { this.referralStatus = referralStatus; }
+    
+    public Integer getReferralId() { return referralId; }
+    public void setReferralId(Integer referralId) { this.referralId = referralId; }
+    
+    public String getReferralReason() { return referralReason; }
+    public void setReferralReason(String referralReason) { this.referralReason = referralReason; }
+    
+    // Helper method to check referral status
+    public boolean hasReferral() {
+        return referralStatus != null && !"NO_REFERRAL".equals(referralStatus);
+    }
+    
+    public boolean isReferralPending() {
+        return "PENDING".equals(referralStatus);
+    }
+    
+    public boolean isReferralAccepted() {
+        return "ACCEPTED".equals(referralStatus);
+    }
+    
+    public boolean isReferralCompleted() {
+        return "COMPLETED".equals(referralStatus);
     }
 }
