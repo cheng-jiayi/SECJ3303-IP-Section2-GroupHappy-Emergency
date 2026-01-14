@@ -170,7 +170,7 @@
             <p>System Administration Dashboard</p>
         </div>
         <div class="card-container">
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/feedbackAndAnalyticsModule/feedbackAnalytics.jsp'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/feedback/Analytics'">
                 <div class="card-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>
