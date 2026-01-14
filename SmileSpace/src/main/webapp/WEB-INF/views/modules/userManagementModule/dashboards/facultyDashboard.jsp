@@ -195,7 +195,7 @@
                 <div class="card-desc">Join faculty discussions</div>
             </div>
 
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/feedbackAndAnalyticsModule/feedback.jsp'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/feedback'">
                 <div class="card-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>
