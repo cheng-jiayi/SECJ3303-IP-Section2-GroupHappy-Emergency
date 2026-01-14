@@ -5,7 +5,7 @@
     String userFullName = (String) session.getAttribute("userFullName");
     
     if (userRole == null || !"admin".equals(userRole)) {
-        response.sendRedirect("../loginPage.jsp");
+        response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 %>
@@ -178,7 +178,7 @@
                 <div class="card-desc">View user feedback</div>
             </div>
             
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/admin/users'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/admin/manageUsers'">
                 <div class="card-icon">
                     <i class="fas fa-users-cog"></i>
                 </div>

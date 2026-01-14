@@ -5,7 +5,7 @@
     String userFullName = (String) session.getAttribute("userFullName");
     
     if (userRole == null || !"student".equals(userRole)) {
-        response.sendRedirect("../loginPage.jsp");
+        response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 %>
