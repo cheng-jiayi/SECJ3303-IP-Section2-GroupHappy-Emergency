@@ -203,13 +203,13 @@
                 <div class="card-desc">Schedule counseling sessions</div>
             </div>
 
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/feedback'">
-                <div class="card-icon">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
-                <div class="card-title">Professional Feedback</div>
-                <div class="card-desc">Share clinical insights</div>
-            </div>
+<div class="card" onclick="window.location.href='${pageContext.request.contextPath}/feedback'">
+    <div class="card-icon">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="card-title">Share Feedback</div>
+    <div class="card-desc">Share your experience</div>
+</div>
         </div>
     </div>
 
