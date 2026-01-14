@@ -288,6 +288,11 @@
                     <i class="fas fa-info-circle"></i> All demo accounts use the same password
                 </p>
             </div>
+
+            <div class="link">
+                <p>Don't have an account?</p>
+                <a href="${pageContext.request.contextPath}/register">Sign Up Now</a>
+            </div>
             
             <div class="footer-text">
                 &copy; 2024 SmileSpace. Student Mental Wellness Platform.
