@@ -1,4 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Check if user is logged in and is an admin
     String userRole = (String) session.getAttribute("userRole");
     String userFullName = (String) session.getAttribute("userFullName");
     
@@ -155,7 +157,7 @@
                 <a href="../profiles/adminProfile.jsp" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
-                <a href="../logout" class="menu-item logout">
+                <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -168,7 +170,7 @@
             <p>System Administration Dashboard</p>
         </div>
         <div class="card-container">
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/feedbackAndAnalyticsModule/feedbackAnalytics.jsp'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/feedback/analytics'">
                 <div class="card-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>
@@ -176,7 +178,7 @@
                 <div class="card-desc">View user feedback</div>
             </div>
             
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/admin/users'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/admin/manageUsers'">
                 <div class="card-icon">
                     <i class="fas fa-users-cog"></i>
                 </div>

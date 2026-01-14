@@ -26,13 +26,26 @@ public class ReferralController {
     @GetMapping
     public String viewAtRiskStudents(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"faculty".equals(user.getUserRole())) {
+        if (user == null) {
             return "redirect:/login";
         }
         
-        // Get students with referral status
+        String userRole = user.getUserRole();
+        
+        // ONLY faculty can view at-risk students
+        if (!"faculty".equals(userRole)) {
+            // If MHP tries to access, redirect them to their own dashboard
+            if ("professional".equals(userRole)) {
+                return "redirect:/counseling?action=viewSessions"; // Go to MHP dashboard
+            }
+            // For other roles, go to login
+            return "redirect:/login";
+        }
+        
+        // Get students with referral status (only for faculty)
         List<Student> atRiskStudents = studentService.getAtRiskStudentsWithReferralStatus(user.getUserId());
         model.addAttribute("students", atRiskStudents);
+        model.addAttribute("userRole", userRole);
         
         return "virtualCounselingModule/faculty/atRiskStudents";
     }
@@ -60,7 +73,9 @@ public class ReferralController {
         return "virtualCounselingModule/faculty/referralForm";
     }
     
-     public String viewReferral(@RequestParam("referralId") int referralId,
+    // Add the @GetMapping annotation here! This was missing
+    @GetMapping("/view")
+    public String viewReferral(@RequestParam("referralId") int referralId,
                             HttpSession session,
                             Model model) {
         User user = (User) session.getAttribute("user");
@@ -97,7 +112,7 @@ public class ReferralController {
         } else if (isProfessional) {
             // Professionals can view any referral (especially pending ones they might accept)
             hasAccess = true;
-            viewName = "virtualCounselingModule/professional/referralDetails";
+            viewName = "virtualCounselingModule/faculty/viewReferral";
         }
         
         if (!hasAccess) {

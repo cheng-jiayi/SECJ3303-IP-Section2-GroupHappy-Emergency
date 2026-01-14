@@ -568,6 +568,11 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
+                                        <a href="<%= contextPath %>/counseling?action=sessionDetails&sessionId=<%= sess.getSessionId() %>" 
+                                            class="action-btn view-btn" 
+                                            style="background: #3498DB; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
                                         <button type="button" 
                                                 class="accept-btn"
                                                 onclick="acceptSingleSession('<%= sess.getSessionId() %>')">

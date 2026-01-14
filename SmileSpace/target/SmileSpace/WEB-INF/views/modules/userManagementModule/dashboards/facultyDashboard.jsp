@@ -1,4 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Check if user is logged in and is a faculty
     String userRole = (String) session.getAttribute("userRole");
     String userFullName = (String) session.getAttribute("userFullName");
     
@@ -155,7 +157,7 @@
                 <a href="../profiles/facultyProfile.jsp" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
-                <a href="../logout" class="menu-item logout">
+                <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -193,7 +195,7 @@
                 <div class="card-desc">Join faculty discussions</div>
             </div>
 
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/feedbackAndAnalyticsModule/feedback.jsp'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/feedback'">
                 <div class="card-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>

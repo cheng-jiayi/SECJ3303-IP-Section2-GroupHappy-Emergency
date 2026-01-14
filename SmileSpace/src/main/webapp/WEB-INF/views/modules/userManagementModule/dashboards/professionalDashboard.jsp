@@ -1,4 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Check if user is logged in and is a professional
     String userRole = (String) session.getAttribute("userRole");
     String userFullName = (String) session.getAttribute("userFullName");
     
@@ -155,7 +157,7 @@
                 <a href="../profiles/professionalProfile.jsp" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
-                <a href="../logout" class="menu-item logout">
+                <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -201,12 +203,13 @@
                 <div class="card-desc">Schedule counseling sessions</div>
             </div>
 
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/feedbackAndAnalyticsModule/feedback.jsp'">
+
+            <div class="card" onclick="window.location.href='${pageContext.request.contextPath}/feedback'">
                 <div class="card-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>
-                <div class="card-title">Professional Feedback</div>
-                <div class="card-desc">Share clinical insights</div>
+                <div class="card-title">Share Feedback</div>
+                <div class="card-desc">Share your experience</div>
             </div>
         </div>
     </div>

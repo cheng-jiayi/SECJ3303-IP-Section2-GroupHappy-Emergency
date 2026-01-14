@@ -297,10 +297,41 @@ public class CounselingController {
         }
         
         System.out.println("DEBUG: Session found - ID: " + session.getSessionId());
+        System.out.println("DEBUG: Student ID: " + session.getStudentId());
+        System.out.println("DEBUG: Counselor ID: " + session.getCounselorId());
+        System.out.println("DEBUG: Session Status: " + session.getStatus());
         
         // Check permissions
-        if (!(session.getStudentId() == userId || 
-            (session.getCounselorId() != null && session.getCounselorId() == userId))) {
+        boolean hasPermission = false;
+        String reason = "";
+        
+        if ("professional".equals(userRole)) {
+            // Professionals can view:
+            // 1. Sessions assigned to them (counselorId == userId)
+            // 2. Unassigned sessions (counselorId == null) so they can decide to accept
+            if (session.getCounselorId() == null) {
+                // Unassigned session - any professional can view
+                hasPermission = true;
+                reason = "Professional viewing unassigned session";
+            } else if (session.getCounselorId() == userId) {
+                // Session assigned to this professional
+                hasPermission = true;
+                reason = "Professional viewing their assigned session";
+            } else {
+                // Session assigned to another professional
+                hasPermission = false;
+                reason = "Session already assigned to another counselor";
+            }
+        } else if ("student".equals(userRole) && session.getStudentId() == userId) {
+            // Student viewing their own session
+            hasPermission = true;
+            reason = "Student viewing their own session";
+        }
+        
+        System.out.println("DEBUG: Permission check - " + reason);
+        System.out.println("DEBUG: Has permission: " + hasPermission);
+        
+        if (!hasPermission) {
             System.out.println("ERROR: Permission denied");
             return "redirect:/counseling?action=viewSessions";
         }
@@ -314,7 +345,6 @@ public class CounselingController {
                 model.addAttribute("student", student);
             }
             
-            // IMPORTANT: Check what view name is being returned
             String viewName = "virtualCounselingModule/professional/sessionDetails";
             System.out.println("DEBUG: Returning view: " + viewName);
             return viewName;

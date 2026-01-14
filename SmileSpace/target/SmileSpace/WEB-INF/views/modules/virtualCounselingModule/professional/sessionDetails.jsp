@@ -425,12 +425,9 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
             color: #8B7355;
             font-style: italic;
             background: rgba(255, 243, 200, 0.3);
-            border-radius: 10px;
-            border: 1px dashed #E8D4B9;
         }
 
         /* Modal Styles */

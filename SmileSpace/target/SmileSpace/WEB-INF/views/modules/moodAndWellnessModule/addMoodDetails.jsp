@@ -307,11 +307,11 @@
     </div>
 
     <!-- Debug info (remove in production) -->
-    <div class="debug-info">
+    <!-- <div class="debug-info">
         DEBUG: Edit Mode: <%= isEdit %><br>
         DEBUG: Existing Image Path: <%= existingImagePath %><br>
         DEBUG: Context Path: <%= request.getContextPath() %>
-    </div>
+    </div> -->
 
     <form action="<%= request.getContextPath() %>/mood" method="post" enctype="multipart/form-data">
         <% for(String feeling : selectedFeelings) { %>
