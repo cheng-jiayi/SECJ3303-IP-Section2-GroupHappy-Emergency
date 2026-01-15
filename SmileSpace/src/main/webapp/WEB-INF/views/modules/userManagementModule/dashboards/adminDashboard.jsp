@@ -154,7 +154,7 @@
                     <div class="user-name"><%= userFullName %></div>
                     <div class="user-role">Administrator</div>
                 </div>
-                <a href="../profiles/adminProfile.jsp" class="menu-item">
+                <a href="${pageContext.request.contextPath}/profile" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
                 <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
