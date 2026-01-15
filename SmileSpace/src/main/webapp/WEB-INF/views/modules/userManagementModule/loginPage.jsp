@@ -205,6 +205,46 @@
             padding: 0;
         }
         
+        /* SIGN UP LINK STYLES */
+        .signup-link-container {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #f0e6d6;
+        }
+        
+        .signup-link-container p {
+            color: #8B7355;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .signup-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #27AE60;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid #27AE60;
+        }
+        
+        .signup-link:hover {
+            background: white;
+            color: #27AE60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        }
+        
+        .signup-link:active {
+            transform: translateY(0);
+        }
+        
         .footer-text {
             text-align: center;
             margin-top: 20px;
@@ -281,17 +321,16 @@
                 <ul>
                     <li><strong>Student:</strong> student1 / password123</li>
                     <li><strong>Faculty:</strong> faculty1 / password123</li>
-                    <li><strong>Admin:</strong> admin / password123</li>
-                    <li><strong>Professional:</strong> dr.sarah / password123</li>
+                    <li><strong>Admin:</strong> admin1 / password123</li>
+                    <li><strong>Professional:</strong> mhp1 / password123</li>
                 </ul>
-                <p style="margin-top: 10px; font-style: italic; color: #8B7355;">
-                    <i class="fas fa-info-circle"></i> All demo accounts use the same password
-                </p>
             </div>
 
-            <div class="link">
+            <div class="signup-link-container">
                 <p>Don't have an account?</p>
-                <a href="${pageContext.request.contextPath}/register">Sign Up Now</a>
+                <a href="${pageContext.request.contextPath}/register" class="signup-link">
+                    <i class="fas fa-user-plus"></i> Sign Up Now
+                </a>
             </div>
             
             <div class="footer-text">
