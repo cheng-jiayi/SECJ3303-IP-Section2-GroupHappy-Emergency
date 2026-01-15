@@ -282,7 +282,7 @@
                     <div class="user-name"><%= userFullName %></div>
                     <div class="user-role">Student</div>
                 </div>
-                <a href="../profiles/studentProfile.jsp" class="menu-item">
+                <a href="${pageContext.request.contextPath}/profile" class="menu-item">
                     <i class="fas fa-user-edit"></i> Manage Profile
                 </a>
                 <a href="${pageContext.request.contextPath}/logout" class="menu-item logout">
@@ -325,7 +325,7 @@
                 <div class="card-desc">Evaluate your mental health</div>
             </div>
 
-            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/modules/peerSupportForumModule/forumHome.jsp'">
+            <div class="card" onclick="window.location.href='<%= request.getContextPath() %>/forum'">
                 <div class="card-icon">
                     <i class="fas fa-users"></i>
                 </div>
