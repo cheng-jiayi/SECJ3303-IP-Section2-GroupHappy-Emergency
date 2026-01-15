@@ -62,15 +62,12 @@ public class User {
     public String getMatricNumber() { return matricNumber; }
     public void setMatricNumber(String matricNumber) { this.matricNumber = matricNumber; }
     
-    public String getProgram() { return faculty; }
-    public void setProgram(String faculty) { this.faculty = faculty; }
+    public String getFaculty() { return faculty; }
+    public void setFaculty(String faculty) { this.faculty = faculty; }
     
     public Integer getYear() { return year; }
     public void setYear(Integer year) { this.year = year; }
-
-    public String getProgramYear() {
-        return getProgram() + " Year " + (getYear() != null ? getYear() : "");
-    }    
+   
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
