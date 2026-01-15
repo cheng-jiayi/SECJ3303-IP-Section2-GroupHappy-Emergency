@@ -86,7 +86,7 @@ public class UserDAO {
                 user.getUserRole(),
                 user.getPhone(),
                 user.getMatricNumber(),
-                user.getProgram(),
+                user.getFaculty(),
                 user.getYear(),
                 user.isActive()
             );
@@ -108,7 +108,7 @@ public class UserDAO {
                 user.getFullName(),
                 user.getPhone(),
                 user.getMatricNumber(),
-                user.getProgram(),
+                user.getFaculty,
                 user.getYear(),
                 user.getUserId()
             );
@@ -216,7 +216,7 @@ public class UserDAO {
             user.setUserRole(rs.getString("user_role"));
             user.setPhone(rs.getString("phone"));
             user.setMatricNumber(rs.getString("matric_number"));
-            user.setProgram(rs.getString("faculty"));
+            user.setFaculty(rs.getString("faculty"));
             
             Integer year = rs.getInt("year");
             if (rs.wasNull()) {
@@ -274,7 +274,7 @@ public class UserDAO {
             user.setUserRole(rs.getString("user_role"));
             user.setPhone(rs.getString("phone"));
             user.setMatricNumber(rs.getString("matric_number"));
-            user.setProgram(rs.getString("faculty"));
+            user.setFaculty(rs.getString("faculty"));
             
             Integer year = rs.getInt("year");
             if (rs.wasNull()) {
