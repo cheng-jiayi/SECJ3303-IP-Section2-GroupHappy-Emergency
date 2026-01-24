@@ -790,7 +790,6 @@ function toggleSelectAll(source) {
 console.log("=== DEBUG: Professional Dashboard Loaded ===");
 console.log("Pending Referrals Count: <%= pendingReferrals != null ? pendingReferrals.size() : 0 %>");
 
-// Check if buttons are actually clickable
 document.addEventListener('DOMContentLoaded', function() {
     var buttons = document.querySelectorAll('.view-btn');
     console.log("Found " + buttons.length + " View buttons total");
