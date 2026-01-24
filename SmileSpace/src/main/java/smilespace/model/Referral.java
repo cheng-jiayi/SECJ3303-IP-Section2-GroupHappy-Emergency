@@ -162,7 +162,7 @@ public class Referral {
         return STATUS_REJECTED.equalsIgnoreCase(this.status);
     }
     
-    public String getProgramYear() {
+    public String getFacultyYear() {
         if (studentFaculty != null && studentYear > 0) {
             return studentFaculty + " / Year " + studentYear;
         }
