@@ -1,5 +1,3 @@
-USE smilespace;
-
 -- Mood entries table
 CREATE TABLE mood_entries (
     entry_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -77,6 +75,20 @@ CREATE TABLE referrals (
     FOREIGN KEY (student_id) REFERENCES users(user_id),
     FOREIGN KEY (faculty_id) REFERENCES users(user_id),
     FOREIGN KEY (counselor_id) REFERENCES users(user_id)
+);
+
+-- Professionals table for MHP details
+CREATE TABLE professionals (
+    professional_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL UNIQUE,
+    specialization VARCHAR(100),
+    experience_years INT,
+    qualifications TEXT,
+    bio TEXT,
+    office_hours TEXT,
+    max_sessions_per_week INT DEFAULT 20,
+    current_sessions_count INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Insert sample mood entries
